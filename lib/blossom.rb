@@ -13,14 +13,12 @@ def Blossom(config_file, index = :index)
       set :views, root
       set :index, index
   
-      Compass.configuration do |config|
-        config.project_path = root
-        config.sass_dir = ""
-        config.images_dir = "static"
-        config.http_images_path = "/"
-        config.output_style = :compact
-        config.line_comments = false
-      end
+      Compass.configuration.project_path = root
+      Compass.configuration.sass_dir = ""
+      Compass.configuration.images_dir = "static"
+      Compass.configuration.http_images_path = "/"
+      Compass.configuration.output_style = :compact
+      Compass.configuration.line_comments = false
   
       set :haml, { :format => :html5, :attr_wrapper => '"' }
       set :sass, Compass.sass_engine_options
