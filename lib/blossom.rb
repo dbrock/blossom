@@ -4,10 +4,25 @@ require "haml"
 require "sass"
 require "compass"
 
+module Blossom
+  module Helpers
+    def file_exists? suffix
+      condition do
+        basename = File.basename(request.path)
+        barename = basename.sub(/\.[^.]*$/, '')
+        name = "#{barename}.#{suffix}"
+        File.exist? File.join(settings.root, name)
+      end
+    end
+  end
+end
+
 def Blossom(config_file, index = :index)
   root = File.dirname(config_file)
   Class.new(Sinatra::Base).tap do |app|
     app.class_eval do
+      extend Blossom::Helpers
+
       configure do
         set :root, root
         set :public, "#{root}/static"
@@ -25,15 +40,6 @@ def Blossom(config_file, index = :index)
         haml settings.index
       end
   
-      def self.file_exists? suffix
-        condition do
-          basename = File.basename(request.path)
-          barename = basename.sub(/\.[^.]*$/, '')
-          name = "#{barename}.#{suffix}"
-          File.exist? File.join(settings.root, name)
-        end
-      end
-    
       get "/:name.css", :file_exists? => :sass do
         content_type "text/css", :charset => "utf-8"
         sass params[:name].to_sym
