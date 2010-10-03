@@ -9,7 +9,8 @@ def Blossom(config_file, index = :index)
   app = Class.new(Sinatra::Base)
   app.class_eval do
     configure do
-      set :public, root
+      set :root, root
+      set :public, "#{root}/static"
       set :views, root
       set :index, index
   
