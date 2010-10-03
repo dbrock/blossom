@@ -1,8 +1,8 @@
 require "rubygems"
 
+require "compass" # Load before sinatra.
 require "sinatra/base"
-require "haml"
-require "compass"
+require "haml" # Load after sinatra.
 require "rack-strip-www"
 require "hassle"
 
