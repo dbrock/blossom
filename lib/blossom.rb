@@ -2,7 +2,6 @@ require "rubygems"
 
 require "sinatra/base"
 require "haml"
-require "sass"
 require "compass"
 require "rack-strip-www"
 require "hassle"
