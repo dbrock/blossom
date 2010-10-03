@@ -29,17 +29,23 @@ def Blossom(config_file, index = :index)
     get "/" do
       haml settings.index
     end
+
+    def self.file_exists? suffix
+      condition do
+        basename = File.basename(request.path)
+        barename = basename.sub(/\.[^.]*$/, '')
+        name = "#{barename}.#{suffix}"
+        File.exist? File.join(settings.root, name)
+      end
+    end
   
-    get "/:name.css" do
+    get "/:name.css", :file_exists? => :sass do
       content_type "text/css", :charset => "utf-8"
       sass params[:name].to_sym
     end
 
-    for file_name in Dir[File.join(root, "*.haml")]
-      name = File.basename(file_name).sub(/\.haml$/, "")
-      get "/#{name}" do
-        haml name.to_sym
-      end
+    get "/:name", :file_exists? => :haml do
+      haml params[:name].to_sym
     end
   end
 
