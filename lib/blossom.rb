@@ -1,16 +1,24 @@
 require "rubygems"
+
 require "sinatra/base"
 require "haml"
 require "sass"
 require "compass"
+require "rack-strip-www"
+require "hassle"
 
 module Blossom ; end
 
-def Blossom(config_file, index = :index)
-  Blossom.new(File.dirname(config_file), index)
+def Blossom(root_file, index = :index)
+  Rack::Builder.app do
+    use RackStripWWW
+    use Hassle
+    run Blossom::Base(root_file, index)
+  end
 end
 
-def Blossom::new(root, index)
+def Blossom::Base(root_file, index = :index)
+  root = File.dirname(root_file)
   Class.new(Sinatra::Base).tap do |app|
     app.class_eval do
       extend Blossom::Helpers
@@ -44,15 +52,13 @@ def Blossom::new(root, index)
   end
 end
 
-module Blossom
-  module Helpers
-    def file_exists? suffix
-      condition do
-        basename = File.basename(request.path)
-        barename = basename.sub(/\.[^.]*$/, '')
-        name = "#{barename}.#{suffix}"
-        File.exist? File.join(settings.root, name)
-      end
+module Blossom::Helpers
+  def file_exists? suffix
+    condition do
+      basename = File.basename(request.path)
+      barename = basename.sub(/\.[^.]*$/, '')
+      name = "#{barename}.#{suffix}"
+      File.exist? File.join(settings.root, name)
     end
   end
 end
