@@ -1,30 +1,73 @@
 #!/usr/bin/env ruby
 
 require 'fileutils'
+require "#{File.dirname(__FILE__)}/../lib/blossom"
 
 include FileUtils
 
-def file_sub(name, pattern, replacement)
-  content = File.read(name)
-  File.open(name, "w") do |file|
-    file.write(content.sub(pattern, replacement))
-  end
+def make_file(name, content)
+  File.open(name, "w") { |file| file.write(content) }
 end
 
 case ARGV.length
 when 1
-  project_name = ARGV.first
-  unless File.exist? project_name
-    blossom_root = File.dirname(__FILE__), ".."
-    cp_r File.join(blossom_root, "example-app"), project_name
-    cd project_name
-    file_sub "config.ru", ":example", ":#{project_name}"
-    file_sub "example.haml", "example.css", "#{project_name}.css"
-    mv "example.haml", "#{project_name}.haml"
-    mv "example.sass", "#{project_name}.sass"
-    system "git init && git add -A && git commit -m 'Create project.'"
+  name = ARGV.first
+  unless File.exist? name
+    mkdir name
+    cd name
+
+    make_file ".gitignore", "tmp\n"
+
+    make_file "config.ru", <<-"end_file"
+require "rubygems"
+require "bundler/setup"
+require "blossom"
+
+run Blossom(__FILE__, :#{name})
+    end_file
+
+    make_file "Gemfile", <<-"end_file"
+source :rubygems
+
+gem 'blossom', '~> #{Blossom::VERSION}'
+    end_file
+
+    make_file "#{name}.haml", <<-"end_file"
+!!!
+%meta(charset="utf-8")
+%title #{name.capitalize}
+%meta(name="description" content="Description of #{name.capitalize}.")
+%link(rel="stylesheet" href="#{name}.css")
+.container
+  %h1 This is <tt>#{name}.haml</tt>.
+    end_file
+
+    make_file "#{name}.sass", <<-"end_file"
+@import compass/reset
+@import blueprint/grid
+
+.container
+  +container
+
+h1
+  margin-top: 80px
+  font-size: 40px
+    end_file
+
+    mkdir "static"
+
+    %x{git init && git add -A && git commit -m 'Create project.'}
+    
+    print "\
+Application created!  Now type \`cd #{name}\' and then \`rackup\'.\n\
+This will run your application at <http://localhost:9292/>.\n\
+You can start hacking in \`#{name}.haml\' and \`#{name}.sass\'.\n\
+If you create \`x.haml\', it will show up at <http://localhost:9292/x>.\n\
+Images and other static files go in the \`static/\' directory.\n\
+Good luck, have fun!\n\
+"
   else
-    warn "#$0: file already exists: #{project_name}"
+    warn "#$0: error: file already exists: #{name}"
     exit -1
   end
 else

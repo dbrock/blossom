@@ -6,7 +6,9 @@ require "haml" # Load after sinatra.
 require "rack-strip-www"
 require "hassle"
 
-module Blossom ; end
+module Blossom
+  VERSION = "0.0.3"
+end
 
 def Blossom(root_file, index = :index)
   Rack::Builder.app do

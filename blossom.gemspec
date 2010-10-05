@@ -1,6 +1,8 @@
+require "#{File.dirname(__FILE__)}/lib/blossom"
+
 Gem::Specification.new do |gem|
   gem.name = 'blossom'
-  gem.version = '0.0.3'
+  gem.version = Blossom::VERSION
   gem.authors = ['Daniel Brockman']
   gem.email = ['daniel@brockman.se']
   gem.summary = 'Quick-start web development with Haml, Sass and Compass.'
