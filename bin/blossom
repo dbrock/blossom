@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+
+function replace() {
+    x=$'\1'
+    sed -i '' "s$x$1$x$2$x" "$3"
+}
+
+if [ $# = 1 ] ; then
+    name="$1"
+    echo Creating Blossom project \`$name\'...
+    git clone -q http://github.com/dbrock/blossom-example.git "$name"
+    cd "$1"
+    rm -rf README .git
+    mv example.haml "$name.haml"
+    mv example.sass "$name.sass"
+    replace ':example' ":$name" config.ru
+    replace 'example.css' "$name.css" "$name.haml"
+    git init
+    git add -A
+    git commit -m "Create Blossom project."
+else
+    echo Usage: $0 NEW-PROJECT-NAME
+    exit -1
+fi
