@@ -1,0 +1,20 @@
+The purpose of this package is to get you up and running as quickly as
+possible with Haml, Sass and Compass.
+
+To use Blossom, simply put this in your config.ru:
+
+  run Blossom(__FILE__)
+
+Now ‘/foo’ maps to ‘foo.haml’ and ‘/foo.css’ to ‘foo.sass’.  The root
+maps to ‘index.haml’.
+
+To use ‘foo.haml’ as the root, do this:
+
+  run Blossom(__FILE__, :foo)
+
+Images and other static files go in the ‘static’ directory.
+
+That’s it!
+
+See http://github.com/dbrock/blossom-example for an example
+application that uses Bundler and Blossom and runs on Heroku.
