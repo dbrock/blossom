@@ -34,7 +34,10 @@ def Blossom::Base(root_file, index = :index)
         Compass.configuration.images_dir = "static"
         Compass.configuration.http_images_path = "/"
         
-        set :sass, Compass.sass_engine_options
+        sass_options = Compass.sass_engine_options.merge \
+          :cache_location => "#{root}/tmp/sass-cache"
+        
+        set :sass, sass_options
       end
     
       get "/" do
