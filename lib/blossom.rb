@@ -33,6 +33,8 @@ def Blossom::Base(root_file, index = :index)
         Compass.configuration.sass_dir = ""
         Compass.configuration.images_dir = "static"
         Compass.configuration.http_images_path = "/"
+        
+        set :sass, Compass.sass_engine_options
       end
     
       get "/" do
