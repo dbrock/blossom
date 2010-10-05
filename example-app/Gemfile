@@ -1,0 +1,3 @@
+source :rubygems
+
+gem 'blossom', '~> 0.0.0'

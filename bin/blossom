@@ -1,26 +1,32 @@
-#!/bin/bash
+#!/usr/bin/env ruby
 
-set -e
+require 'fileutils'
 
-function replace() {
-    x=$'\1'
-    sed -i '' "s$x$1$x$2$x" "$3"
-}
+include FileUtils
 
-if [ $# = 1 ] ; then
-    name="$1"
-    echo Creating Blossom project \`$name\'...
-    git clone -q http://github.com/dbrock/blossom-example.git "$name"
-    cd "$1"
-    rm -rf README .git
-    mv example.haml "$name.haml"
-    mv example.sass "$name.sass"
-    replace ':example' ":$name" config.ru
-    replace 'example.css' "$name.css" "$name.haml"
-    git init
-    git add -A
-    git commit -m "Create Blossom project."
-else
-    echo Usage: $0 NEW-PROJECT-NAME
+def file_sub(name, pattern, replacement)
+  content = File.read(name)
+  File.open(name, "w") do |file|
+    file.write(content.sub(pattern, replacement))
+  end
+end
+
+case ARGV.length
+when 1
+  project_name = ARGV.first
+  unless File.exist? project_name
+    blossom_root = File.dirname(__FILE__), ".."
+    cp_r File.join(blossom_root, "example-app"), project_name
+    cd project_name
+    file_sub "config.ru", ":example", ":#{project_name}"
+    file_sub "example.haml", "example.css", "#{project_name}.css"
+    mv "example.haml", "#{project_name}.haml"
+    mv "example.sass", "#{project_name}.sass"
+    system "git init && git add -A && git commit -m 'Create project.'"
+  else
+    warn "#$0: file already exists: #{project_name}"
     exit -1
-fi
+  end
+else
+  warn "Usage: #$0 PROJECT-NAME"
+end
