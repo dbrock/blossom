@@ -12,6 +12,7 @@ end
 case ARGV.length
 when 1
   name = ARGV.first
+  name_symbol = name =~ /\W/ ? ":'#{name}'" : ":#{name}"
   unless File.exist? name
     mkdir name
     cd name
@@ -23,7 +24,7 @@ require "rubygems"
 require "bundler/setup"
 require "blossom"
 
-run Blossom(__FILE__, :#{name})
+run Blossom(__FILE__, #{name_symbol})
     end_file
 
     make_file "Gemfile", <<-"end_file"
