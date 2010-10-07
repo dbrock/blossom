@@ -3,7 +3,7 @@ require "rubygems"
 require "compass" # Load before sinatra.
 require "sinatra/base"
 require "haml" # Load after sinatra.
-require "rack-strip-www"
+require "rack/strip-www"
 require "hassle"
 
 module Blossom
@@ -12,7 +12,7 @@ end
 
 def Blossom(root_file, index = :index)
   Rack::Builder.app do
-    use RackStripWWW
+    use Rack::StripWWW
     use Hassle
     run Blossom::Base(root_file, index)
   end
