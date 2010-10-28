@@ -9,8 +9,22 @@ def make_file(name, content)
   File.open(name, "w") { |file| file.write(content) }
 end
 
-case ARGV.length
-when 1
+def print_usage
+  warn "Usage: #$0 PROJECT-NAME"
+end
+
+if ARGV.empty?
+  print_usage
+elsif ARGV[0].start_with? "-"
+  case ARGV[0]
+  when "--version", "-v"
+    puts Blossom::VERSION
+  when "--help", "-h", "-?"
+    print_usage
+  else
+    warn "#$0: unrecognized option: #{ARGV[0]}"
+  end
+else
   name = ARGV.first
   name_symbol = name =~ /\W/ ? ":'#{name}'" : ":#{name}"
   unless File.exist? name
