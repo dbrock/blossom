@@ -10,15 +10,15 @@ module Blossom
   VERSION = "0.0.5"
 end
 
-def Blossom(root_file, index = :index)
+def Blossom(root_file, index = :index, options = {})
   Rack::Builder.app do
     use Rack::StripWWW
     use Hassle
-    run Blossom::Base(root_file, index)
+    run Blossom::Base(root_file, index, options)
   end
 end
 
-def Blossom::Base(root_file, index = :index)
+def Blossom::Base(root_file, index = :index, blossom_options = {})
   root = File.dirname(root_file)
   Class.new(Sinatra::Base).tap do |app|
     app.class_eval do
@@ -43,16 +43,50 @@ def Blossom::Base(root_file, index = :index)
       end
     
       get "/" do
+        headers blossom_headers
         haml settings.index
       end
   
       get "/:name.css", :file_exists? => :sass do
+        headers blossom_headers
         content_type "text/css", :charset => "utf-8"
         sass params[:name].to_sym
       end
   
       get "/:name", :file_exists? => :haml do
+        headers blossom_headers
         haml params[:name].to_sym
+      end
+      
+      define_method :blossom_headers do
+        if blossom_options.include? :cache
+          seconds = get_seconds(*blossom_options[:cache])
+          { 'Cache-Control' => "public, max-age=#{seconds}" }
+        else
+          {}
+        end
+      end
+
+      def get_seconds(value, unit)
+        days = 60 * 60 * 24
+        case unit
+        when :seconds, :second
+          value
+        when :minutes, :minute
+          value * 60
+        when :hours, :hour
+          value * 60 * 60
+        when :days, :day
+          value * days
+        when :weeks, :week
+          value * days * 7
+        when :months, :month
+          value * days * 30
+        when :years, :year
+          value * days * 365
+        else
+          raise ArgumentError, "Unrecognized unit: #{unit}"
+        end
       end
     end
   end

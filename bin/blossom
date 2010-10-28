@@ -38,7 +38,7 @@ require "rubygems"
 require "bundler/setup"
 require "blossom"
 
-run Blossom(__FILE__, #{name_symbol})
+run Blossom(__FILE__, #{name_symbol}, :cache => [1, :year])
     end_file
 
     make_file "Gemfile", <<-"end_file"
@@ -79,12 +79,11 @@ This will run your application at <http://localhost:9292/>.\n\
 You can start hacking in \`#{name}.haml\' and \`#{name}.sass\'.\n\
 If you create \`x.haml\', it will show up at <http://localhost:9292/x>.\n\
 Images and other static files go in the \`static/\' directory.\n\
+In production, your pages are cached; configure this in \`config.ru\'.
 Good luck, have fun!\n\
 "
   else
     warn "#$0: error: file already exists: #{name}"
     exit -1
   end
-else
-  warn "Usage: #$0 PROJECT-NAME"
 end
