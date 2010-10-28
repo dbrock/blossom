@@ -7,7 +7,7 @@ require "rack/strip-www"
 require "hassle"
 
 module Blossom
-  VERSION = "0.0.5"
+  VERSION = "0.0.6"
 end
 
 def Blossom(root_file, index = :index, options = {})
