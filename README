@@ -7,3 +7,17 @@ possible with Haml, Sass and Compass:
   $ rackup
   $ open http://localhost:9292/
   $ emacs foo.haml foo.sass
+
+Blossom automatically makes a Git repository for the project and
+creates a first commit containing the initial boilerplate.
+
+You could actually push this to Heroku right away:
+
+  $ heroku create foo
+  $ git push heroku master
+  $ heroku open
+
+At Go Interactive (http://gointeractive.se), we already run several
+production web sites exactly like this.
+
+I love my job. <3
