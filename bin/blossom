@@ -38,7 +38,7 @@ require "rubygems"
 require "bundler/setup"
 require "blossom"
 
-run Blossom(__FILE__, #{name_symbol}, :cache => [1, :year])
+run Blossom(__FILE__, #{name_symbol}, :cache => [1, :day])
     end_file
 
     make_file "Gemfile", <<-"end_file"
