@@ -63,7 +63,7 @@ def Blossom::Base(root_file, index = :index, blossom_options = {})
       define_method :blossom_headers do
         if blossom_options.include? :cache
           seconds = get_seconds(*blossom_options[:cache])
-          { 'Cache-Control' => "public, max-age=#{seconds}" }
+          { 'Cache-Control' => "max-age=#{seconds}" }
         else
           {}
         end
