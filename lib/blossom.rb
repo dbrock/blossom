@@ -34,8 +34,14 @@ end
 
 def Blossom(root_file, index = :index, options = {})
   Rack::Builder.app do
-    use Rack::StripWWW
+    cache = options[:cache]
     use Hassle
+    use Rack::StripWWW
+    defined? Rack::Coffee and use Rack::Coffee,
+      :static => false,
+      :urls => "/",
+      :cache => !!cache,
+      :ttl => cache && Blossom.get_seconds(*cache)
     run Blossom::Base(root_file, index, options)
   end
 end
