@@ -26,7 +26,7 @@ elsif ARGV[0].start_with? "-"
   end
 else
   name = ARGV.first
-  name_symbol = name =~ /\W/ ? ":'#{name}'" : ":#{name}"
+  name_symbol = name =~ /\W|^\d/ ? ":'#{name}'" : ":#{name}"
   unless File.exist? name
     mkdir name
     cd name
