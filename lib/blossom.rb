@@ -7,7 +7,7 @@ require "rack/strip-www"
 require "hassle"
 
 module Blossom
-  VERSION = "0.0.8"
+  VERSION = "0.0.9"
 end
 
 def Blossom.get_seconds(value, unit)
