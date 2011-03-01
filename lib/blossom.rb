@@ -36,7 +36,7 @@ def Blossom(root_file, index = :index, options = {})
   Rack::Builder.app do
     cache = options[:cache]
     use Hassle
-    use Rack::StripWWW
+    use Rack::StripWWW unless options[:strip_www?] == false
     defined? Rack::Coffee and use Rack::Coffee,
       :static => false,
       :urls => "/",
