@@ -49,24 +49,26 @@ gem 'blossom', '~> #{Blossom::VERSION}'
 
     make_file "#{name}.haml", <<-"end_file"
 !!!
-%meta(charset="utf-8")
-%title #{name.capitalize}
-%meta(name="description" content="Description of #{name.capitalize}.")
-%link(rel="stylesheet" href="#{name}.css")
-.container
-  %h1 This is <tt>#{name}.haml</tt>.
+%html
+  %head
+    %meta(charset="utf-8")
+    %title #{name.capitalize}
+    %meta(name="description" content="Description of #{name.capitalize}.")
+    %link(rel="stylesheet" href="#{name}.css")
+  %body
+    %h1 This is <tt>#{name}.haml</tt>.
     end_file
 
     make_file "#{name}.sass", <<-"end_file"
 @import compass/reset
-@import blueprint/grid
 
-.container
-  +container
+body
+  width: 600px
+  margin: auto
 
 h1
+  font: 200 40px "Helvetica Neue", Helvetica
   margin-top: 80px
-  font-size: 40px
     end_file
 
     mkdir "static"
