@@ -97,6 +97,9 @@ def Blossom.Base(root_file, index = :index, blossom_options = {})
         end
       end
     end
+
+    code = File.read("#{root}/#{index}.rb") rescue nil
+    app.class_eval(code) if code
   end
 end
 
