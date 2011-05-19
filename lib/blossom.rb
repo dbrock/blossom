@@ -1,13 +1,7 @@
 require "rubygems"
 
-require "compass" # Load before sinatra.
-require "sinatra/base"
-require "haml" # Load after sinatra.
-require "rack/strip-www"
-require "hassle"
-
 module Blossom
-  VERSION = "0.0.12"
+  VERSION = "0.99.1"
 end
 
 def Blossom.get_seconds(value, unit)
@@ -33,6 +27,19 @@ def Blossom.get_seconds(value, unit)
 end
 
 def Blossom(root_file, index = :index, options = {})
+  require "compass" # Load before sinatra.
+  require "sinatra/base"
+  require "haml" # Load after sinatra.
+  require "rack/strip-www"
+  require "hassle"
+
+  begin
+    require "rack/coffee"
+    warn "Blossom: Using CoffeeScript."
+  rescue LoadError
+    warn "Blossom: Not using CoffeeScript."
+  end
+
   Rack::Builder.app do
     cache = options[:cache]
     use Hassle
@@ -77,13 +84,19 @@ def Blossom.Base(root_file, index = :index, blossom_options = {})
         haml settings.index
       end
   
+      get "/:name.js", :file_exists? => :js do
+        headers blossom_headers
+        content_type "text/javascript", :charset => "utf-8"
+        send_file "#{params[:name]}.js"
+      end
+  
       get "/:name.css", :file_exists? => :sass do
         headers blossom_headers
         content_type "text/css", :charset => "utf-8"
         sass params[:name].to_sym
       end
   
-      get "/:name", :file_exists? => :haml do
+      get "/:name", :path_exists? => :haml do
         headers blossom_headers
         haml params[:name].to_sym
       end
@@ -104,12 +117,18 @@ def Blossom.Base(root_file, index = :index, blossom_options = {})
 end
 
 module Blossom::Helpers
+  def path_exists? suffix
+    condition do
+      basename = File.basename(request.path)
+      File.exist? File.join(settings.root, "#{basename}.#{suffix}")
+    end
+  end
+
   def file_exists? suffix
     condition do
       basename = File.basename(request.path)
       barename = basename.sub(/\.[^.]*$/, '')
-      name = "#{barename}.#{suffix}"
-      File.exist? File.join(settings.root, name)
+      File.exist? File.join(settings.root, "#{barename}.#{suffix}")
     end
   end
 end

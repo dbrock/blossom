@@ -9,27 +9,50 @@ def make_file(name, content)
   File.open(name, "w") { |file| file.write(content) }
 end
 
-def print_usage
-  warn "Usage: #$0 PROJECT-NAME"
+def usage
+  "Usage: #$0 PROJECT-NAME"
+end
+
+def die(message)
+  error message
+  exit 1
+end
+
+def error(message)
+  warn "Blossom: Error: #{message}"
+end
+
+def run(command)
+  puts "$ #{command}"
+  system command or die "Command failed: #{command}"
 end
 
 if ARGV.empty?
-  print_usage
+  print usage
 elsif ARGV[0].start_with? "-"
   case ARGV[0]
   when "--version", "-v"
     puts Blossom::VERSION
   when "--help", "-h", "-?"
-    print_usage
+    print usage
   else
-    warn "#$0: unrecognized option: #{ARGV[0]}"
+    error "Unrecognized option: #{ARGV[0]}"
+    warn usage
+    exit 1
   end
 else
   name = ARGV.first
   name_symbol = name =~ /\W|^\d/ ? ":'#{name}'" : ":#{name}"
-  unless File.exist? name
-    mkdir name
-    cd name
+
+  if File.exist? name
+    die "File already exists: #{name}"
+  else
+    puts "Blossom creating project: #{name}"
+
+    puts "$ mkdir #{name}; cd #{name}"
+    mkdir name; cd name
+
+    puts "Installing Blossom boilerplate."
 
     make_file ".gitignore", "tmp\n"
 
@@ -38,13 +61,21 @@ require "rubygems"
 require "bundler/setup"
 require "blossom"
 
-run Blossom(__FILE__, #{name_symbol}, :cache => [1, :day])
+app = Blossom __FILE__, #{name_symbol},
+  # :strip_www? => false,
+  :cache => [1, :day]
+
+run app
     end_file
 
     make_file "Gemfile", <<-"end_file"
 source :rubygems
 
 gem 'blossom', '~> #{Blossom::VERSION}'
+
+## Uncomment the following if you want to use CoffeeScript.
+## (See further instructions in #{name}.js.)
+# gem 'rack-coffee'
     end_file
 
     make_file "#{name}.haml", <<-"end_file"
@@ -55,6 +86,7 @@ gem 'blossom', '~> #{Blossom::VERSION}'
     %title #{name.capitalize}
     %meta(name="description" content="Description of #{name.capitalize}.")
     %link(rel="stylesheet" href="#{name}.css")
+    %script(src="#{name}.js")
   %body
     %h1 This is <tt>#{name}.haml</tt>.
     end_file
@@ -71,21 +103,48 @@ h1
   margin-top: 80px
     end_file
 
+    make_file "#{name}.rb", <<-"end_file"
+# Put any custom Sinatra routes you need here.
+
+# get '/hello' do
+#   "Hello World"
+# end
+    end_file
+
+    make_file "#{name}.js", <<-"end_file"
+// If you do not want to use CoffeeScript, you can delete this comment.
+// If you do, first install the CoffeeScript compiler and Rack::Coffee:
+//
+//    $ npm install -g coffee-script
+//    $ gem install rack-coffee
+//    $ echo "gem 'rack-coffee'" >> Gemfile
+//    $ bundle
+//
+// Then simply delete this file and create #{name}.coffee instead.
+    end_file
+
     mkdir "static"
 
-    %x{git init && git add -A && git commit -m 'Create project.'}
+    run "bundle --local"
+    run "git init"
+    run "git add -A"
+    run "git commit -m 'Create project.'"
     
-    print "\
+    puts "\
+\n\
 Application created!  Now type \`cd #{name}\' and then \`rackup\'.\n\
 This will run your application at <http://localhost:9292/>.\n\
-You can start hacking in \`#{name}.haml\' and \`#{name}.sass\'.\n\
-If you create \`x.haml\', it will show up at <http://localhost:9292/x>.\n\
-Images and other static files go in the \`static/\' directory.\n\
-In production, your pages are cached; configure this in \`config.ru\'.
-Good luck, have fun!\n\
-"
-  else
-    warn "#$0: error: file already exists: #{name}"
-    exit -1
+\n\
+Start hacking in \`#{name}.haml\' and \`#{name}.sass\'.  If you\n\
+create \`x.haml\', it will show up at <http://localhost:9292/x>.\n\
+\n\
+Images and other static files go in the \`static/\' directory, but\n\
+you can put Javascript files in the root directory if you want.\n\
+If you prefer CoffeeScript, follow the instructions in \`#{name}.js\'.\n\
+\n\
+Your custom Sinatra routes, if you need any, go in \`#{name}.rb\'.\n\
+In production, your site is cached; configure this in \`config.ru\'.\n\
+\n\
+Good luck and have fun! :-)"
   end
 end
