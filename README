@@ -1,4 +1,4 @@
-Blossom is a kind of "nanoframework" built on top of Sinatra with
+Blossom is a kind of "anti-framework" built on top of Sinatra with
 the express purpose of minimizing the amount of boilerplate needed
 for state of the art web development.  One command gets you up and
 running on a new web project instantly, with Haml, Sass, Compass,
