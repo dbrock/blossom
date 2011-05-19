@@ -1,7 +1,7 @@
 require "rubygems"
 
 module Blossom
-  VERSION = "0.99.1"
+  VERSION = "1.0.0alpha1"
 end
 
 def Blossom.get_seconds(value, unit)
