@@ -25,7 +25,8 @@ Then follow the instructions that Blossom echoes back to you:
 
 Blossom automatically makes a Git repository for the project and
 creates a first commit containing the initial boilerplate (after
-running Bundler and generating your Gemfile.lock).
+running Bundler and generating your Gemfile.lock --- I assume you
+have some familiarity with Bundler <http://gembundler.com> already).
 
 
 Another major goal is to make deployment as painless as possible,
