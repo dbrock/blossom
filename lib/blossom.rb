@@ -1,7 +1,7 @@
 require "rubygems"
 
 module Blossom
-  VERSION = "1.0.0alpha1"
+  VERSION = "1.0.0alpha2"
 end
 
 def Blossom.get_seconds(value, unit)
@@ -49,6 +49,7 @@ def Blossom(root_file, index = :index, options = {})
       :urls => "/",
       :cache => !!cache,
       :ttl => cache && Blossom.get_seconds(*cache)
+    warn "Blossom: Starting web server."
     run Blossom::Base(root_file, index, options)
   end
 end
