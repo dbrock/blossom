@@ -12,6 +12,6 @@ Gem::Specification.new do |gem|
   gem.add_dependency('sinatra', '~> 1.0')
   gem.add_dependency('haml', '~> 3.0')
   gem.add_dependency('compass', '~> 0.10')
-  gem.add_dependency('rack-strip-www', '~> 0.2')
+  gem.add_dependency('rack-normalize-domain', '~> 0.0.1')
   gem.add_dependency('hassle')
 end

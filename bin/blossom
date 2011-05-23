@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'fileutils'
+require "fileutils"
 require "#{File.dirname(__FILE__)}/../lib/blossom"
 
 include FileUtils
@@ -43,6 +43,7 @@ elsif ARGV[0].start_with? "-"
 else
   name = ARGV.first
   name_symbol = name =~ /\W|^\d/ ? ":'#{name}'" : ":#{name}"
+  name_pretty = name.capitalize.gsub(/[-_]/, " ")
 
   if File.exist? name
     die "File already exists: #{name}"
@@ -54,6 +55,11 @@ else
 
     puts "Installing Blossom boilerplate."
 
+    make_file "#{name}.blossom", <<"^D"
+Content-Max-Age: 1 day
+# Normalize-Domains: no
+^D
+
     make_file ".gitignore", "tmp\n"
 
     make_file "config.ru", <<"^D"
@@ -61,19 +67,31 @@ require "rubygems"
 require "bundler/setup"
 require "blossom"
 
-run Blossom __FILE__, #{name_symbol},
-  # :strip_www? => false,
-  :cache => [1, :day]
+# You can insert any middleware you need here (just remember to add
+# any new dependencies to your Gemfile and to run \`bundle\'):
+#
+# require "some/other/middleware"
+# use Some::Other::Middleware
+
+run Blossom __FILE__
+
+# If you need to use Blossom when configuring some other middleware,
+# you have to save a reference to the Blossom application first:
+#
+# blossom = Blossom __FILE__
+# use Some::Other::Middleware, :sass_options => blossom.sass_options
+# run blossom
 ^D
 
     make_file "Gemfile", <<"^D"
 source :rubygems
 
-gem 'blossom', '~> #{Blossom::VERSION}'
+gem "blossom", "~> #{Blossom::VERSION}"
 
-## Uncomment the following if you want to use CoffeeScript.
-## (See further instructions in #{name}.js.)
-# gem 'rack-coffee'
+# Uncomment the following if you want to use CoffeeScript.
+# (See further instructions in #{name}.js.)
+#
+# gem "rack-coffee"
 ^D
 
     make_file "#{name}.haml", <<"^D"
@@ -81,8 +99,8 @@ gem 'blossom', '~> #{Blossom::VERSION}'
 %html
   %head
     %meta(charset="utf-8")
-    %title #{name.capitalize}
-    %meta(name="description" content="Description of #{name.capitalize}.")
+    %title #{name_pretty}
+    %meta(name="description" content="Description of #{name_pretty}.")
     %link(rel="stylesheet" href="#{name}.css")
     %script(src="#{name}.js")
   %body
@@ -97,14 +115,15 @@ body
   margin: auto
 
 h1
-  font: 200 40px "Helvetica Neue", Helvetica
+  font: 200 40px/1.5 "Helvetica Neue", Helvetica
   margin-top: 80px
 ^D
 
-    make_file "#{name}.rb", <<"^D"
-# Put any custom Sinatra routes you need here.
+    make_file "#{name}.sinatra.rb", <<"^D"
+# Put any custom Sinatra routes or configuration here.
+# See <http://www.sinatrarb.com/documentation> for help.
 
-# get '/hello' do
+# get "/hello" do
 #   "Hello World"
 # end
 ^D
@@ -115,7 +134,7 @@ h1
 //
 //    $ npm install -g coffee-script
 //    $ gem install rack-coffee
-//    $ echo "gem 'rack-coffee'" >> Gemfile
+//    $ echo 'gem "rack-coffee"' >> Gemfile
 //    $ bundle
 //
 // Then simply delete this file and create #{name}.coffee instead.
@@ -140,8 +159,8 @@ Images and other static files go in the \`static/\' directory, but
 you can put Javascript files in the root directory if you want.
 If you prefer CoffeeScript, follow the instructions in \`#{name}.js\'.
 
-Your custom Sinatra routes, if you need any, go in \`#{name}.rb\'.
-In production, your site is cached; configure this in \`config.ru\'.
+Put any custom Sinatra routes you need in \`#{name}.sinatra.rb\'.
+Configuration of Blossom is done in \`#{name}.blossom\'.
 
 Good luck and have fun! :-)
 ^D

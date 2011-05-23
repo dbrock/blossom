@@ -21,12 +21,14 @@ Then follow the instructions that Blossom echoes back to you:
   $ rackup &                           # Start the web server.
   $ open http://localhost:9292/        # Look at your site.
   $ emacs foo.haml foo.sass foo.js     # Edit your site.
-  $ emacs foo.rb                       # Add routes, if you need to.
+  $ emacs foo.sinatra.rb               # Add routes, if you need to.
+  $ emacs config.ru                    # Edit the middleware stack.
 
 Blossom automatically makes a Git repository for the project and
 creates a first commit containing the initial boilerplate (after
-running Bundler and generating your Gemfile.lock --- I assume you
-have some familiarity with Bundler <http://gembundler.com> already).
+running Bundler and generating your Gemfile.lock --- we assume you
+have some familiarity with Bundler <http://gembundler.com> already;
+if Bundler is new to you, you need to get familiar with it).
 
 
 Another major goal is to make deployment as painless as possible,
@@ -51,10 +53,10 @@ For convenience, here is how you add a domain name to your site:
 
 If you add both example.com and www.example.com, then Blossom will
 automatically redirect http://www.example.com to http://example.com.
-To disable this feature, see `config.ru'.
+To disable this feature, see your `foo.blossom' configuration file.
 
 
-For painless domain registration and DNS hosting, I wholeheartedly
+For painless domain registration and DNS hosting, we wholeheartedly
 recommend DNSimple (<http://dnsimple.com/>, @dnsimple on Twitter).
 They are the first DNS service that feels right to me as a hacker:
 
@@ -64,12 +66,12 @@ username: YOUR-EMAIL
 password: YOUR-PASSWORD
 ^D
 
-Now purchasing and configuring a domain for Heroku is a breeze:
+Now purchasing and configuring a domain for Heroku is this simple:
 
   $ dnsimple register example.com
   $ dnsimple apply example.com heroku
 
-(I know this is a digression, but I really want to promote these
+(I know this was a digression, but I really want to promote these
 people, because I've been waiting so long for a good DNS service.
 Oh, and if you sign up using my referral URL, we both get free DNS
 hosting for two months! :D <https://dnsimple.com/r/c941a853d41f19>)
@@ -77,4 +79,4 @@ hosting for two months! :D <https://dnsimple.com/r/c941a853d41f19>)
 
                   Thanks, and happy hacking!
 
-                           --- @dbrock
+                           --- @dbrock <http://twitter.com/dbrock>
