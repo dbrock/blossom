@@ -56,19 +56,17 @@ else
 
     make_file ".gitignore", "tmp\n"
 
-    make_file "config.ru", <<-"end_file"
+    make_file "config.ru", <<"^D"
 require "rubygems"
 require "bundler/setup"
 require "blossom"
 
-app = Blossom __FILE__, #{name_symbol},
+run Blossom __FILE__, #{name_symbol},
   # :strip_www? => false,
   :cache => [1, :day]
+^D
 
-run app
-    end_file
-
-    make_file "Gemfile", <<-"end_file"
+    make_file "Gemfile", <<"^D"
 source :rubygems
 
 gem 'blossom', '~> #{Blossom::VERSION}'
@@ -76,9 +74,9 @@ gem 'blossom', '~> #{Blossom::VERSION}'
 ## Uncomment the following if you want to use CoffeeScript.
 ## (See further instructions in #{name}.js.)
 # gem 'rack-coffee'
-    end_file
+^D
 
-    make_file "#{name}.haml", <<-"end_file"
+    make_file "#{name}.haml", <<"^D"
 !!!
 %html
   %head
@@ -89,9 +87,9 @@ gem 'blossom', '~> #{Blossom::VERSION}'
     %script(src="#{name}.js")
   %body
     %h1 This is <tt>#{name}.haml</tt>.
-    end_file
+^D
 
-    make_file "#{name}.sass", <<-"end_file"
+    make_file "#{name}.sass", <<"^D"
 @import compass/reset
 
 body
@@ -101,17 +99,17 @@ body
 h1
   font: 200 40px "Helvetica Neue", Helvetica
   margin-top: 80px
-    end_file
+^D
 
-    make_file "#{name}.rb", <<-"end_file"
+    make_file "#{name}.rb", <<"^D"
 # Put any custom Sinatra routes you need here.
 
 # get '/hello' do
 #   "Hello World"
 # end
-    end_file
+^D
 
-    make_file "#{name}.js", <<-"end_file"
+    make_file "#{name}.js", <<"^D"
 // If you do not want to use CoffeeScript, you can delete this comment.
 // If you do, first install the CoffeeScript compiler and Rack::Coffee:
 //
@@ -121,7 +119,7 @@ h1
 //    $ bundle
 //
 // Then simply delete this file and create #{name}.coffee instead.
-    end_file
+^D
 
     mkdir "static"
 
@@ -130,21 +128,22 @@ h1
     run "git add -A"
     run "git commit -m 'Create project.'"
     
-    puts "\
-\n\
-Application created!  Now type \`cd #{name}\' and then \`rackup\'.\n\
-This will run your application at <http://localhost:9292/>.\n\
-\n\
-Start hacking in \`#{name}.haml\' and \`#{name}.sass\'.  If you\n\
-create \`x.haml\', it will show up at <http://localhost:9292/x>.\n\
-\n\
-Images and other static files go in the \`static/\' directory, but\n\
-you can put Javascript files in the root directory if you want.\n\
-If you prefer CoffeeScript, follow the instructions in \`#{name}.js\'.\n\
-\n\
-Your custom Sinatra routes, if you need any, go in \`#{name}.rb\'.\n\
-In production, your site is cached; configure this in \`config.ru\'.\n\
-\n\
-Good luck and have fun! :-)"
+    puts <<"^D"
+
+Application created!  Now type \`cd #{name}\' and then \`rackup\'.
+This will run your application at <http://localhost:9292/>.
+
+Start hacking in \`#{name}.haml\' and \`#{name}.sass\'.  If you
+create \`x.haml\', it will show up at <http://localhost:9292/x>.
+
+Images and other static files go in the \`static/\' directory, but
+you can put Javascript files in the root directory if you want.
+If you prefer CoffeeScript, follow the instructions in \`#{name}.js\'.
+
+Your custom Sinatra routes, if you need any, go in \`#{name}.rb\'.
+In production, your site is cached; configure this in \`config.ru\'.
+
+Good luck and have fun! :-)
+^D
   end
 end
