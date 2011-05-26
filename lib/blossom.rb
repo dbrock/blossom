@@ -20,7 +20,8 @@ module Blossom
   LOCAL_VERSION = "#{VERSION}.99.local"
 
   def self.fail(message)
-    Kernel.fail "[Blossom] Error: #{message}"
+    info "Error: #{message}"
+    exit 1
   end
 
   def self.info(message)
