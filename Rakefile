@@ -25,3 +25,8 @@ end
 task "build-release" do
   sh "gem build blossom.gemspec"
 end
+
+desc "Remove all *.gem files."
+task "clean" do
+  sh "rm *.gem"
+end
