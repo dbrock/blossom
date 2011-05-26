@@ -14,11 +14,6 @@ rescue LoadError
 end
 
 module Blossom
-  VERSION = "1.0.0alpha4"
-
-  # Special version for manual installations using `rake install'.
-  LOCAL_VERSION = "#{VERSION}.99.local"
-
   def self.fail(message)
     info "Error: #{message}"
     exit 1

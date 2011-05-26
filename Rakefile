@@ -1,25 +1,25 @@
-require "#{File.dirname(__FILE__)}/lib/blossom"
+require "rubygems"
 
-local_name = "blossom-#{Blossom::LOCAL_VERSION}"
-release_name = "blossom-#{Blossom::VERSION}"
+local = Gem::Specification.load("blossom-local.gemspec")
+release = Gem::Specification.load("blossom.gemspec")
 
-desc "Build and install #{local_name}."
+desc "Build and install #{local.full_name}."
 task "install" => ["build-local", "uninstall"] do
-  sh "sudo gem install #{local_name}.gem --local"
+  sh "sudo gem install #{local.file_name} --local"
 end
 
-desc "Uninstall #{local_name}."
+desc "Uninstall #{local.full_name}."
 task "uninstall" do
-  sh "sudo gem uninstall blossom -v #{Blossom::LOCAL_VERSION} || true"
+  sh "sudo gem uninstall blossom -v #{local.version} || true"
 end
 
 task "build-local" do
   sh "gem build blossom-local.gemspec"
 end
 
-desc "Build and release #{release_name}."
+desc "Build and release #{release.full_name}."
 task "release" => ["build-release"] do
-  sh "gem push #{release_name}.gem"
+  sh "gem push #{release.file_name}"
 end
 
 task "build-release" do
