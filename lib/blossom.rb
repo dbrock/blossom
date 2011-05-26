@@ -1,23 +1,33 @@
 require "rubygems"
-require "rack"
+require "yaml"
 
-module Blossom
-  VERSION = "1.0.0alpha3"
+require "rack"
+require "rack/normalize-domain"
+require "hassle"
+
+require "compass" # Load before sinatra.
+require "sinatra/base"
+require "haml" # Load after sinatra.
+
+begin
+  require "rack/coffee"
+rescue LoadError
 end
 
-def Blossom(root_file)
-  require "compass" # Load before sinatra.
-  require "sinatra/base"
-  require "haml" # Load after sinatra.
-  require "rack/normalize-domain"
-  require "hassle"
-  
-  begin
-    require "rack/coffee"
-  rescue LoadError
+module Blossom
+  VERSION = "1.0.0alpha4"
+
+  def self.fail(message)
+    Kernel.fail "Blossom: Error: #{message}"
   end
 
-  Blossom::Application.new(File.dirname(root_file))
+  def self.info(message)
+    Kernel.warn "Blossom: #{message}"
+  end
+end
+
+def Blossom(root_filename)
+  Blossom::Application.new(File.dirname(root_filename))
 end
 
 class Blossom::Application < Rack::Builder
@@ -25,148 +35,163 @@ class Blossom::Application < Rack::Builder
     super()
 
     @root = root
-    @name = get_application_name
-    @config = get_config
 
-    build!
+    determine_name!
+    load_configuration!
+    configure!
+    build_rack!
   end
 
-  def get_application_name
-    names = glob(@root, "*.blossom")
-    case names.size
-    when 0
-      error "Missing configuration file: NAME.blossom"
-    when 1
-      names[0].sub(/\.blossom$/, '')
-    else
-      error "Multiple configuration files: #{names * ', '}"
-    end
-  end
+  # --------------------------------------------------------
 
-  def glob(root, glob)
-    Dir[File.join(root, glob)].map { |name| File.basename(name) }
+  def compass_options
+    { :project_path => @root,
+      :sass_dir => "",
+      :images_dir => @config.public_directory,
+      :http_images_path => "/",
+      :output_style => :compact,
+      :line_comments => false }
   end
-
-  def build!
-    use Hassle
-    use_normalize_domain!
-    use_coffee!
-    run get_app
-  end
-
-  def use_normalize_domain!
-    if @config.normalize_domains?
-      use Rack::NormalizeDomain
-      status "Normalizing domains by removing initial www."
-    else
-      status "Not normalizing domains."
-    end
-  end
-
-  def use_coffee!
-    if defined? Rack::Coffee
-      use Rack::Coffee, coffee_options
-      status "Using CoffeeScript."
-    else
-      status "Not using CoffeeScript."
-    end
-  end
-
-  def error(message) fail "Blossom: Error: #{message}" end
-  def status(message) warn "Blossom: #{message}" end
 
   def coffee_options
-    {
-      :static => false,
+    { :static => false,
       :urls => "/",
       :cache => @config.cache_content?,
-      :ttl => @config.content_max_age
-    }
-  end
-
-  def get_config
-    Configuration.new(get_config_hash)
-  end
-
-  def get_config_hash
-    case result = YAML.load_file(config_file_name)
-    when false: {} # Empty file.
-    when Hash: result
-    else error "Bad configuration file: #{config_file_name}"
-    end
-  rescue Errno::ENOENT
-    {}
-  end
-
-  def config_file_name; application_file_name("blossom") end
-  def sinatra_file_name; application_file_name("sinatra.rb") end
-  def sass_cache_location; file_name("tmp", "sass-cache") end
-  def static_location; file_name("static") end
-
-  def application_file_name(extension)
-    file_name("#@name.#{extension}")
-  end
-
-  def custom_sinatra_code
-    File.read(sinatra_file_name) rescue nil
-  end
-
-  def file_name(*components)
-    File.join(@root, *components)
-  end
-
-  def configure_compass!
-    config = Compass.configuration
-    config.project_path = @root
-    config.sass_dir = ""
-    config.images_dir = "static"
-    config.http_images_path = "/"
-    config.output_style = :compact
-    config.line_comments = false
-  end
-
-  def sass_options
-    Compass.sass_engine_options.merge \
-      :cache_location => sass_cache_location
+      :ttl => @config.content_max_age }
   end
 
   def haml_options
     { :format => :html5, :attr_wrapper => '"' }
   end
 
-  def get_app
-    blossom_config = @config
+  def sass_options
+    Compass.sass_engine_options.merge \
+      :cache_location => sass_cache_dirname
+  end
 
-    app = Class.new(Sinatra::Base)
-    app.extend SinatraHelpers
+  # --------------------------------------------------------
+
+  def determine_name!
+    names = glob("*.blossom")
+    case names.size
+    when 0
+      Blossom.fail "Missing configuration file: NAME.blossom"
+    when 1
+      @name = names[0].sub(/\.blossom$/, '')
+    else
+      Blossom.fail "Multiple configuration files: #{names * ', '}"
+    end
+  end
+
+  def load_configuration!
+    @config = Configuration.new(configuration_hash)
+  end
+
+  def configuration_hash
+    case result = YAML.load_file(configuration_filename)
+    when false: {} # Empty file.
+    when Hash: result
+    else Blossom.fail "Bad configuration file: #{configuration_filename}"
+    end
+  rescue Errno::ENOENT
+    {}
+  end
+
+  # --------------------------------------------------------
+
+  def configuration_filename
+    filename("#@name.blossom") end
+  def sinatra_code_filename
+    filename("#@name.sinatra.rb") end
+  def sass_cache_dirname
+    filename("tmp", "sass-cache") end
+  def public_dirname
+    filename(@config.public_directory) end
+
+  def glob(glob)
+    Dir[filename(glob)].map { |name| File.basename(name) } end
+  def filename(*components)
+    File.join(@root, *components) end
+
+  # --------------------------------------------------------
+
+  def configure!
+    compass_options.each do |key, value|
+      Compass.configuration.send("#{key}=", value)
+    end
+  end
+
+  def build_rack!
+    use_hassle!
+    use_rack_normalize_domain!
+    use_rack_coffee!
+    run sinatra_app
+  end
+
+  def use_hassle!
+    use Hassle
+  end
+
+  def use_rack_normalize_domain!
+    if @config.strip_www?
+      use Rack::NormalizeDomain
+      Blossom.info "Normalizing domains by removing initial www."
+    else
+      Blossom.info "Not normalizing domains."
+    end
+  end
+
+  def use_rack_coffee!
+    if defined? Rack::Coffee
+      use Rack::Coffee, coffee_options
+      Blossom.info "Using CoffeeScript."
+    else
+      Blossom.info "Not using CoffeeScript."
+    end
+  end
+
+  def sinatra_app
+    app = Sinatra.new
+    app.set :blossom, self
 
     app.set :root, @root
     app.set :index, @name.to_sym
 
     app.set :views, @root
-    app.set :public, static_location
+    app.set :public, public_dirname
 
     app.set :haml, haml_options
     app.set :sass, sass_options
 
-    if blossom_config.cache_content?
-      app.before do
-        cache_control \
-          :max_age => blossom_config.content_max_age
+    # Need variable here for lexical scoping.
+    max_age = @config.max_age
+    app.before { cache_control :max_age => max_age }
+
+    app.register do
+      def path_exists? suffix
+        condition do
+          basename = File.basename(request.path_info)
+          File.exist? File.join(settings.root, "#{basename}.#{suffix}")
+        end
+      end
+  
+      def file_exists? suffix
+        condition do
+          basename = File.basename(request.path_info)
+          barename = basename.sub(/\.[^.]*$/, '')
+          File.exist? File.join(settings.root, "#{barename}.#{suffix}")
+        end
       end
     end
 
-    app.get "/" do
-      haml settings.index
-    end
-  
-    app.get "/:name.js", :file_exists? => :js do
-      content_type "text/javascript", :charset => "utf-8"
-      send_file "#{params[:name]}.js"
+    @config.public_extensions.each do |extension|
+      app.get "/:name.#{extension}", :file_exists? => extension do
+        send_file "#{params[:name]}.#{extension}"
+      end
     end
   
     app.get "/:name.css", :file_exists? => :sass do
-      content_type "text/css", :charset => "utf-8"
+      content_type :css
       sass params[:name].to_sym
     end
   
@@ -174,70 +199,92 @@ class Blossom::Application < Rack::Builder
       haml params[:name].to_sym
     end
 
-    app.class_eval(custom_sinatra_code) if custom_sinatra_code
+    app.get "/" do
+      haml settings.index
+    end
 
-    return app
+    if custom_sinatra_code
+      app.class_eval(custom_sinatra_code)
+    end
+
+    app
   end
 
-  module SinatraHelpers
-    def path_exists? suffix
-      condition do
-        basename = File.basename(request.path)
-        File.exist? File.join(settings.root, "#{basename}.#{suffix}")
-      end
-    end
-
-    def file_exists? suffix
-      condition do
-        basename = File.basename(request.path)
-        barename = basename.sub(/\.[^.]*$/, '')
-        File.exist? File.join(settings.root, "#{barename}.#{suffix}")
-      end
-    end
+  def custom_sinatra_code
+    File.read(sinatra_code_filename) rescue nil
   end
 
-  class Configuration
-    def initialize(yaml)
-      @yaml = yaml
-    end
+  # --------------------------------------------------------
 
-    def normalize_domains?
-      case @yaml["Normalize-Domains"]
-      when nil, true: true
-      when false: false
-      else fail "Blossom: Configuration error: Normalize-Domains"
-      end
-    end
+  class Configuration < Struct.new(:user_data)
+    DEFAULTS = YAML.load <<"^D"
+Public-Directory: public
+Public-Extensions: js css html png jpg
+Max-Cache-Time: 1 day
+Remove-WWW-From-Domain: yes
+^D
 
-    def cache_content?
-      content_max_age != nil
-    end
+    def public_directory
+      get("Public-Directory").string end
+    def strip_www?
+      get("Remove-WWW-From-Domain").boolean end
+    def max_age
+      get("Max-Cache-Time").duration end
+    def public_extensions
+      get("Public-Extensions").words end
 
-    def content_max_age
-      parse_duration(@yaml["Content-Max-Age"])
-    end
+  private
 
-    def parse_duration(input)
-      case input
-      when nil
-        nil
-      when /^((?:\d+\.)?\d+) ([a-z]+?)s?$/
-        $1.to_f * time_unit($2.to_sym)
+    def get(name)
+      if user_data.include? name
+        Value.new(user_data[name])
       else
-        fail "Bad duration: #{input}"
+        Value.new(DEFAULTS[name])
       end
     end
 
-    def time_unit(name)
-      case name
-      when :second: 1
-      when :minute: 60
-      when :hour: 60 * 60
-      when :day: 24 * time_unit(:hour)
-      when :week: 7 * time_unit(:day)
-      when :month: 30 * time_unit(:day)
-      when :year: 365 * time_unit(:day)
-      else fail "Bad time unit: #{name}"
+    class Value < Struct.new(:value)
+      def string
+        value.to_s
+      end
+
+      def words
+        value.gsub(/^\s+|\s$/, "").split(/\s+/)
+      end
+
+      def boolean
+        if value == true or value == false
+          value
+        else
+          fail "Must be \`yes' or \`no\': #{name}"
+        end
+      end
+
+      def duration
+        if value =~ /^((?:\d+\.)?\d+) ([a-z]+?)s?$/
+          $1.to_f * time_unit($2.to_sym)
+        else
+          error "Bad duration: #{value}"
+        end
+      end
+
+    private
+
+      def fail(message)
+        Blossom.fail "Configuration: #{value}: #{message}"
+      end
+
+      def time_unit(name)
+        case name
+        when :second: 1
+        when :minute: 60
+        when :hour: 60 * 60
+        when :day: 24 * time_unit(:hour)
+        when :week: 7 * time_unit(:day)
+        when :month: 30 * time_unit(:day)
+        when :year: 365 * time_unit(:day)
+        else fail "Unknown time unit: #{name}"
+        end
       end
     end
   end

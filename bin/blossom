@@ -56,8 +56,22 @@ else
     puts "Installing Blossom boilerplate."
 
     make_file "#{name}.blossom", <<"^D"
-Content-Max-Age: 1 day
-# Normalize-Domains: no
+## This is the Blossom configuration file.
+##
+## All settings are listed here with their default values.
+## To change a setting, you have to uncomment the line first.
+
+## The directory in which to put arbitrary public files:
+# Public-Directory: public
+
+## Files with these extensions are always public:
+# Public-Extensions: js css html png jpg
+
+## The maximum amount of time browsers may cache the site:
+# Max-Cache-Time: 1 day
+
+## Whether or not to remove the "www." part of the domain:
+# Remove-WWW-From-Domain: yes
 ^D
 
     make_file ".gitignore", "tmp\n"
@@ -67,20 +81,7 @@ require "rubygems"
 require "bundler/setup"
 require "blossom"
 
-# You can insert any middleware you need here (just remember to add
-# any new dependencies to your Gemfile and to run \`bundle\'):
-#
-# require "some/other/middleware"
-# use Some::Other::Middleware
-
 run Blossom __FILE__
-
-# If you need to use Blossom when configuring some other middleware,
-# you have to save a reference to the Blossom application first:
-#
-# blossom = Blossom __FILE__
-# use Some::Other::Middleware, :sass_options => blossom.sass_options
-# run blossom
 ^D
 
     make_file "Gemfile", <<"^D"
@@ -123,6 +124,12 @@ h1
 # Put any custom Sinatra routes or configuration here.
 # See <http://www.sinatrarb.com/documentation> for help.
 
+# This is also where you insert middleware (just remember to add
+# any new dependencies to your Gemfile and to run \`bundle\'):
+#
+# require "some/middleware"
+# use Some::Middleware
+
 # get "/hello" do
 #   "Hello World"
 # end
@@ -133,7 +140,7 @@ h1
 // If you do, first install the CoffeeScript compiler and Rack::Coffee:
 //
 //    $ npm install -g coffee-script
-//    $ gem install rack-coffee
+//    $ sudo gem install rack-coffee
 //    $ echo 'gem "rack-coffee"' >> Gemfile
 //    $ bundle
 //
@@ -155,12 +162,20 @@ This will run your application at <http://localhost:9292/>.
 Start hacking in \`#{name}.haml\' and \`#{name}.sass\'.  If you
 create \`x.haml\', it will show up at <http://localhost:9292/x>.
 
-Images and other static files go in the \`static/\' directory, but
-you can put Javascript files in the root directory if you want.
-If you prefer CoffeeScript, follow the instructions in \`#{name}.js\'.
+Public files go in the \`public/\' directory, but you can put images
+and Javascript files directly in the root directory if you want.
+This (and other things) can be configured in \`#{name}.blossom\'.
 
-Put any custom Sinatra routes you need in \`#{name}.sinatra.rb\'.
-Configuration of Blossom is done in \`#{name}.blossom\'.
+  !! Warning: Blossom 0.0.x used \`static/\', not \`public/\'.
+
+Put any custom middleware or Sinatra code in \`#{name}.sinatra.rb\',
+but remember to restart your application after changing this file.
+
+If you restart your application a lot, there is a drop-in replacement
+for rackup called Shotgun <https://github.com/rtomayko/shotgun>:
+
+   $ sudo gem install shotgun
+   $ shotgun # Like rackup, except with automatic reloading.
 
 Good luck and have fun! :-)
 ^D
