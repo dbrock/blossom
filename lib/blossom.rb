@@ -1,12 +1,13 @@
-require "yaml"
+require "blossom/version"
 
+require "sass"
+require "compass"
+
+require "haml"
 require "rack"
 require "rack/normalize-domain"
-require "hassle"
-
-require "compass" # Load before sinatra.
 require "sinatra/base"
-require "haml" # Load after sinatra.
+require "yaml"
 
 begin
   require "rack/coffee"
@@ -43,28 +44,32 @@ class Blossom::Application < Rack::Builder
   # --------------------------------------------------------
 
   def compass_options
-    { :project_path => @root,
-      :sass_dir => "",
-      :images_dir => @config.public_directory,
-      :http_images_path => "/",
-      :output_style => :compact,
-      :line_comments => false }
+    return \
+      :cache_dir         => sass_cache_dirname,
+      :http_images_path  => "/",
+      :images_dir        => @config.public_directory,
+      :line_comments     => false,
+      :output_style      => :compact,
+      :project_path      => @root,
+      :sass_dir          => ""
   end
 
   def coffee_options
-    { :static => false,
-      :urls => "/",
-      :cache => @config.cache_content?,
-      :ttl => @config.content_max_age }
+    return \
+      :cache   => @config.cache_content?,
+      :static  => false,
+      :ttl     => @config.content_max_age,
+      :urls    => "/"
   end
 
   def haml_options
-    { :format => :html5, :attr_wrapper => '"' }
+    return \
+      :format        => :html5,
+      :attr_wrapper  => '"'
   end
 
   def sass_options
-    Compass.sass_engine_options.merge \
-      :cache_location => sass_cache_dirname
+    Compass.sass_engine_options
   end
 
   # --------------------------------------------------------
@@ -117,17 +122,18 @@ class Blossom::Application < Rack::Builder
     compass_options.each do |key, value|
       Compass.configuration.send("#{key}=", value)
     end
+
+    Compass.configure_sass_plugin!
+
+    # XXX: Why do we have to set this manually?
+    Sass::Plugin.options[:cache_store] =
+      Sass::CacheStores::Filesystem.new(sass_cache_dirname)
   end
 
   def build_rack!
-    use_hassle!
     use_rack_normalize_domain!
     use_rack_coffee!
     run sinatra_app
-  end
-
-  def use_hassle!
-    use Hassle
   end
 
   def use_rack_normalize_domain!
@@ -187,7 +193,7 @@ class Blossom::Application < Rack::Builder
         send_file "#{params[:name]}.#{extension}"
       end
     end
-  
+
     app.get "/:name.css", :file_exists? => :sass do
       content_type :css
       sass params[:name].to_sym
