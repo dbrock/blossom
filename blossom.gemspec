@@ -1,6 +1,6 @@
 Gem::Specification.new do |gem|
   gem.name = "blossom"
-  gem.version = "1.0.0alpha4"
+  gem.version = "1.0.0alpha5"
   gem.author = "Daniel Brockman"
   gem.email = "daniel@gointeractive.se"
   gem.summary = "Quick-start web development with Haml, Sass and Compass."
