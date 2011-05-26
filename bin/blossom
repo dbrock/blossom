@@ -147,7 +147,7 @@ h1
 // Then simply delete this file and create #{name}.coffee instead.
 ^D
 
-    mkdir "static"
+    mkdir "public"
 
     run "bundle --local"
     run "git init"
@@ -166,7 +166,7 @@ Public files go in the \`public/\' directory, but you can put images
 and Javascript files directly in the root directory if you want.
 This (and other things) can be configured in \`#{name}.blossom\'.
 
-  !! Warning: Blossom 0.0.x used \`static/\', not \`public/\'.
+  !! Warning: Old versions of Blossom used \`static/\', not \`public/\'.
 
 Put any custom middleware or Sinatra code in \`#{name}.sinatra.rb\',
 but remember to restart your application after changing this file.
