@@ -1,18 +1,15 @@
 require "blossom/version"
 
-require "sass"
+require "coffee_script"
 require "compass"
-
 require "haml"
 require "rack"
 require "rack/normalize-domain"
+require "sass"
 require "sinatra/base"
+require "sprockets"
 require "yaml"
-
-begin
-  require "rack/coffee"
-rescue LoadError
-end
+require "siss/template"
 
 module Blossom
   def self.fail(message)
@@ -52,14 +49,6 @@ class Blossom::Application < Rack::Builder
       :output_style      => :compact,
       :project_path      => @root,
       :sass_dir          => ""
-  end
-
-  def coffee_options
-    return \
-      :cache   => @config.cache_content?,
-      :static  => false,
-      :ttl     => @config.content_max_age,
-      :urls    => "/"
   end
 
   def haml_options
@@ -130,10 +119,31 @@ class Blossom::Application < Rack::Builder
       Sass::CacheStores::Filesystem.new(sass_cache_dirname)
   end
 
+  def sass_engine
+    engine = Class.new Tilt::SassTemplate
+    engine.default_mime_type = "text/css"
+    options = sass_options # Need variable here for lexical scoping.
+    engine.__send__(:define_method, :options) { options.merge(super) }
+    engine
+  end
+
+  def siss_engine
+    engine = Class.new Siss::SassTemplate
+    engine.default_mime_type = "application/json"
+    engine.sass_options = sass_options
+    engine
+  end
+
   def build_rack!
     use_rack_normalize_domain!
-    use_rack_coffee!
-    run sinatra_app
+
+    sprockets = Sprockets::Environment.new(@root)
+    sprockets.append_path "."
+    sprockets.register_engine ".sass", sass_engine
+    sprockets.register_engine ".sass", siss_engine
+    sprockets.register_mime_type "application/json", ".siss-json"
+
+    run Rack::Cascade.new [sinatra_app, sprockets, sinatra_app]
   end
 
   def use_rack_normalize_domain!
@@ -142,15 +152,6 @@ class Blossom::Application < Rack::Builder
       Blossom.info "Normalizing domains by removing initial www."
     else
       Blossom.info "Not normalizing domains."
-    end
-  end
-
-  def use_rack_coffee!
-    if defined? Rack::Coffee
-      use Rack::Coffee, coffee_options
-      Blossom.info "Using CoffeeScript."
-    else
-      Blossom.info "Not using CoffeeScript."
     end
   end
 
@@ -188,20 +189,23 @@ class Blossom::Application < Rack::Builder
       end
     end
 
-    @config.public_extensions.each do |extension|
-      app.get "/:name.#{extension}", :file_exists? => extension do
-        send_file "#{params[:name]}.#{extension}"
-      end
-    end
+    # @config.public_extensions.each do |extension|
+    #   app.get "/:name.#{extension}", :exists? => [] do
+    #     send_file "#{params[:name]}.#{extension}"
+    #   end
+    # end
 
-    app.get "/:name.css", :file_exists? => :sass do
-      content_type :css
-      sass params[:name].to_sym
-    end
+    # app.get "/:name.css", :exists_replacing_extension? => :sass do
+    #   sass params[:name].to_sym
+    # end
   
-    app.get "/:name", :path_exists? => :haml do
-      haml params[:name].to_sym
-    end
+    # app.get "/:name.js", :exists_replacing_extension? => :coffee do
+    #   coffee params[:name].to_sym
+    # end
+  
+    # app.get "/:name", :path_exists_adding_extension? => :haml do
+    #   haml params[:name].to_sym
+    # end
 
     app.get "/" do
       haml settings.index
