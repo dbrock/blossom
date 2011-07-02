@@ -92,9 +92,12 @@ class Blossom::Application < Rack::Builder
 
   def configuration_hash
     case result = YAML.load_file(configuration_filename)
-    when false: {} # Empty file.
-    when Hash: result
-    else Blossom.fail "Bad configuration file: #{configuration_filename}"
+    when false # Empty file.
+      {}
+    when Hash
+      result
+    else
+      Blossom.fail "Bad configuration file: #{configuration_filename}"
     end
   rescue Errno::ENOENT
     {}
