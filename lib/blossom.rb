@@ -92,12 +92,9 @@ class Blossom::Application < Rack::Builder
 
   def configuration_hash
     case result = YAML.load_file(configuration_filename)
-    when false # Empty file.
-      {}
-    when Hash
-      result
-    else
-      Blossom.fail "Bad configuration file: #{configuration_filename}"
+    when false then {} # Empty file.
+    when Hash then result
+    else Blossom.fail "Bad configuration file: #{configuration_filename}"
     end
   rescue Errno::ENOENT
     {}
@@ -283,13 +280,13 @@ Remove-WWW-From-Domain: yes
 
       def time_unit(name)
         case name
-        when :second: 1
-        when :minute: 60
-        when :hour: 60 * 60
-        when :day: 24 * time_unit(:hour)
-        when :week: 7 * time_unit(:day)
-        when :month: 30 * time_unit(:day)
-        when :year: 365 * time_unit(:day)
+        when :second then 1
+        when :minute then 60
+        when :hour then 60 * 60
+        when :day then 24 * time_unit(:hour)
+        when :week then 7 * time_unit(:day)
+        when :month then 30 * time_unit(:day)
+        when :year then 365 * time_unit(:day)
         else fail "Unknown time unit: #{name}"
         end
       end
