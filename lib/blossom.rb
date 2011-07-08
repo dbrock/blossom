@@ -167,6 +167,10 @@ class Blossom::Application < Rack::Builder
     app.set :haml, haml_options
     app.set :sass, sass_options
 
+    if custom_sinatra_code
+      app.class_eval(custom_sinatra_code)
+    end
+
     # Need variable here for lexical scoping.
     max_age = @config.max_age
     app.before { cache_control :max_age => max_age }
@@ -205,10 +209,6 @@ class Blossom::Application < Rack::Builder
 
     app.get "/" do
       haml settings.index
-    end
-
-    if custom_sinatra_code
-      app.class_eval(custom_sinatra_code)
     end
 
     app
