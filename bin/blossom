@@ -1,12 +1,18 @@
 #!/usr/bin/env ruby
 
+BLOSSOM_HOME = File.join(File.dirname(__FILE__), "..")
+
 require "fileutils"
-require "#{File.dirname(__FILE__)}/../lib/blossom"
+require "#{BLOSSOM_HOME}/lib/blossom"
 
 include FileUtils
 
 def make_file(name, content)
   File.open(name, "w") { |file| file.write(content) }
+end
+
+def copy_file(name, destination)
+  FileUtils.cp "#{BLOSSOM_HOME}/#{name}", "#{destination}/#{name}"
 end
 
 def usage
@@ -95,29 +101,61 @@ gem "blossom", "~> #{Blossom::VERSION}"
 # gem "rack-coffee"
 ^D
 
+    mkdir "public"
+
+    copy_file "nwmatcher-1.2.4-min.js", "public"
+    copy_file "selectivizr-1.0.2-min.js", "public"
+
+    make_file "head-boilerplate.haml", <<"^D"
+%link(rel="stylesheet" href="#{name}.css")
+/[if lt IE 9]
+  %script(src="//html5shiv.googlecode.com/svn/trunk/html5.js")
+  %script(src="nwmatcher-1.2.4-min.js")
+  %script(src="selectivizr-1.0.2-min.js")
+%script(src="//ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js")
+%script(src="#{name}.js")
+^D
+
     make_file "#{name}.haml", <<"^D"
 !!!
 %html
   %head
     %meta(charset="utf-8")
-    %title #{name_pretty}
-    %meta(name="description" content="Description of #{name_pretty}.")
-    %link(rel="stylesheet" href="#{name}.css")
-    %script(src="#{name}.js")
+    %title [insert title here]
+    %meta(name="description" content="[insert description here]")
+    = haml :"head-boilerplate"
   %body
-    %h1 This is <tt>#{name}.haml</tt>.
+    %h1 <tt>#{name}.haml</tt>
+    %p
+      I threw in jQuery 1.6.4 for you.  Old versions of IE will also
+      get <a href="http://code.google.com/p/html5shiv/">html5shiv</a>,
+      <a href="http://javascript.nwbox.com/NWMatcher/">NWMatcher</a> and
+      <a href="http://selectivizr.com">Selectivizr</a>, so you can
+      use HTML5 elements and CSS3 selectors.
+    %p
+      Note: If you want to rename this file, you must also rename
+      <tt>#{name}.blossom</tt> and <tt>#{name}.sinatra.rb</tt>.
 ^D
 
     make_file "#{name}.sass", <<"^D"
 @import compass/reset
+@import compass/utilities
+@import compass/css3
 
 body
+  font: 24px/1.5 Helvetica, sans-serif
   width: 600px
   margin: auto
 
 h1
-  font: 200 40px/1.5 "Helvetica Neue", Helvetica
-  margin-top: 80px
+  font-size: 200%
+  margin: 1em 0 .5em
+
+p
+  margin: 1em 0
+
+tt
+  font-family: monospace
 ^D
 
     make_file "#{name}.sinatra.rb", <<"^D"
@@ -146,8 +184,6 @@ h1
 //
 // Then simply delete this file and create #{name}.coffee instead.
 ^D
-
-    mkdir "public"
 
     run "bundle --local"
     run "git init"
