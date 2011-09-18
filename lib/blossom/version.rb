@@ -1,3 +1,3 @@
 module Blossom
-  VERSION = "1.0.0alpha10"
+  VERSION = "1.0.0alpha11"
 end
