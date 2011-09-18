@@ -45,7 +45,7 @@ class Blossom::Application < Rack::Builder
 
   def compass_options
     return \
-      :cache_dir         => sass_cache_dirname,
+      :cache_dir         => "tmp/sass-cache",
       :http_images_path  => "/",
       :images_dir        => @config.public_directory,
       :line_comments     => false,
@@ -106,8 +106,6 @@ class Blossom::Application < Rack::Builder
     filename("#@name.blossom") end
   def sinatra_code_filename
     filename("#@name.sinatra.rb") end
-  def sass_cache_dirname
-    filename("tmp", "sass-cache") end
   def public_dirname
     filename(@config.public_directory) end
 
@@ -124,10 +122,6 @@ class Blossom::Application < Rack::Builder
     end
 
     Compass.configure_sass_plugin!
-
-    # XXX: Why do we have to set this manually?
-    Sass::Plugin.options[:cache_store] =
-      Sass::CacheStores::Filesystem.new(sass_cache_dirname)
   end
 
   def build_rack!
