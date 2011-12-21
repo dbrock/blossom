@@ -103,18 +103,7 @@ gem "blossom", "~> #{Blossom::VERSION}"
 
     mkdir "public"
 
-    copy_file "nwmatcher-1.2.4-min.js", "public"
     copy_file "selectivizr-1.0.2-min.js", "public"
-
-    make_file "head-boilerplate.haml", <<"^D"
-%link(rel="stylesheet" href="#{name}.css")
-/[if lt IE 9]
-  %script(src="//html5shiv.googlecode.com/svn/trunk/html5.js")
-  %script(src="nwmatcher-1.2.4-min.js")
-  %script(src="selectivizr-1.0.2-min.js")
-%script(src="//ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js")
-%script(src="#{name}.js")
-^D
 
     make_file "#{name}.haml", <<"^D"
 !!!
@@ -123,18 +112,12 @@ gem "blossom", "~> #{Blossom::VERSION}"
     %meta(charset="utf-8")
     %title [insert title here]
     %meta(name="description" content="[insert description here]")
-    = haml :"head-boilerplate"
+    %link(rel="stylesheet" href="#{name}.css")
+    %script(src="#{name}.js")
+    /[if lt IE 9]
+      %script(src="//html5shiv.googlecode.com/svn/trunk/html5.js")
   %body
-    %h1 <tt>#{name}.haml</tt>
-    %p
-      I threw in jQuery 1.6.4 for you.  Old versions of IE will also
-      get <a href="http://code.google.com/p/html5shiv/">html5shiv</a>,
-      <a href="http://javascript.nwbox.com/NWMatcher/">NWMatcher</a> and
-      <a href="http://selectivizr.com">Selectivizr</a>, so you can
-      use HTML5 elements and CSS3 selectors.
-    %p
-      Note: If you want to rename this file, you must also rename
-      <tt>#{name}.blossom</tt> and <tt>#{name}.sinatra.rb</tt>.
+    %h1 #{name}.haml
 ^D
 
     make_file "#{name}.sass", <<"^D"
@@ -142,20 +125,10 @@ gem "blossom", "~> #{Blossom::VERSION}"
 @import compass/utilities
 @import compass/css3
 
-body
-  font: 24px/1.5 Helvetica, sans-serif
-  width: 600px
-  margin: auto
-
 h1
-  font-size: 200%
-  margin: 1em 0 .5em
-
-p
-  margin: 1em 0
-
-tt
-  font-family: monospace
+  font: 48px monospace
+  margin-top: 1em
+  text-align: center
 ^D
 
     make_file "#{name}.sinatra.rb", <<"^D"
@@ -201,8 +174,6 @@ create \`x.haml\', it will show up at <http://localhost:9292/x>.
 Public files go in the \`public/\' directory, but you can put images
 and Javascript files directly in the root directory if you want.
 This (and other things) can be configured in \`#{name}.blossom\'.
-
-  !! Warning: Old versions of Blossom used \`static/\', not \`public/\'.
 
 Put any custom middleware or Sinatra code in \`#{name}.sinatra.rb\',
 but remember to restart your application after changing this file.

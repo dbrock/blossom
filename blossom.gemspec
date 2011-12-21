@@ -9,13 +9,7 @@ Gem::Specification.new do |gem|
   gem.summary = "Quick-start web development with Haml, Sass and Compass."
   gem.homepage = "http://github.com/dbrock/blossom"
   gem.executable = "blossom"
-  gem.files = %w|
-    bin/blossom
-    lib/blossom.rb
-    lib/blossom/version.rb
-    nwmatcher-1.2.4-min.js
-    selectivizr-1.0.2-min.js
-  |
+  gem.files = %w[bin/blossom lib/blossom.rb lib/blossom/version.rb]
   gem.add_dependency("sinatra", "~> 1.0")
   gem.add_dependency("sass", "~> 3.1.1")
   gem.add_dependency("haml", "~> 3.1.1")
