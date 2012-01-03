@@ -103,8 +103,6 @@ gem "blossom", "~> #{Blossom::VERSION}"
 
     mkdir "public"
 
-    copy_file "selectivizr-1.0.2-min.js", "public"
-
     make_file "#{name}.haml", <<"^D"
 !!!
 %html
