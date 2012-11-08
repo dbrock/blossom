@@ -25,7 +25,7 @@ def die(message)
 end
 
 def error(message)
-  warn "Blossom: Error: #{message}"
+  warn "$0: #{message}"
 end
 
 def run(command)
@@ -36,14 +36,8 @@ end
 if ARGV.empty?
   puts usage
 elsif ARGV[0].start_with? "-"
-  case ARGV[0]
-  when "--help", "-h", "-?"
-    puts usage
-  else
-    error "Unrecognized option: #{ARGV[0]}"
-    warn usage
-    exit 1
-  end
+  puts usage
+  exit 1
 else
   name = ARGV.first
   name_symbol = name =~ /\W|^\d/ ? ":'#{name}'" : ":#{name}"
@@ -73,9 +67,6 @@ else
 
 ## The maximum amount of time browsers may cache the site:
 # Max-Cache-Time: 1 day
-
-## Whether or not to remove the "www." part of the domain:
-# Remove-WWW-From-Domain: yes
 ^D
 
     make_file ".gitignore", "tmp\n"
@@ -101,8 +92,8 @@ gem "blossom"
 %html
   %head
     %meta(charset="utf-8")
-    %title [insert title here]
-    %meta(name="description" content="[insert description here]")
+    %title
+    %meta(name="description" content="")
     %link(rel="stylesheet" href="#{name}.css")
     %script(src="#{name}.js")
     /[if lt IE 9]
@@ -111,30 +102,16 @@ gem "blossom"
     %h1 #{name}.haml
 ^D
 
-    make_file "#{name}.sass", <<"^D"
-@import compass/reset
-@import compass/utilities
-@import compass/css3
+    make_file "#{name}.scss", <<"^D"
+@import 'compass/reset';
+@import 'compass/utilities';
+@import 'compass/css3';
 
-h1
-  font: 48px monospace
-  margin-top: 1em
-  text-align: center
-^D
-
-    make_file "#{name}.sinatra.rb", <<"^D"
-# Put any custom Sinatra routes or configuration here.
-# See <http://www.sinatrarb.com/documentation> for help.
-
-# This is also where you insert middleware (just remember to add
-# any new dependencies to your Gemfile and to run \`bundle\'):
-#
-# require "some/middleware"
-# use Some::Middleware
-
-# get "/hello" do
-#   "Hello World"
-# end
+h1 {
+  font: 48px monospace;
+  margin-top: 1em;
+  text-align: center;
+}
 ^D
 
     make_file "#{name}.js", ''
@@ -144,28 +121,7 @@ h1
     run "git add -A"
     run "git commit -m 'Create project.'"
     
-    puts <<"^D"
-
-Application created!  Now type \`cd #{name}\' and then \`rackup\'.
-This will run your application at <http://localhost:9292/>.
-
-Start hacking in \`#{name}.haml\' and \`#{name}.sass\'.  If you
-create \`x.haml\', it will show up at <http://localhost:9292/x>.
-
-Public files go in the \`public/\' directory, but you can put images
-and Javascript files directly in the root directory if you want.
-This (and other things) can be configured in \`#{name}.blossom\'.
-
-Put any custom middleware or Sinatra code in \`#{name}.sinatra.rb\',
-but remember to restart your application after changing this file.
-
-If you restart your application a lot, there is a drop-in replacement
-for rackup called Shotgun <https://github.com/rtomayko/shotgun>:
-
-   $ sudo gem install shotgun
-   $ shotgun # Like rackup, except with automatic reloading.
-
-Good luck and have fun! :-)
-^D
+    puts "Application created!  Now type \`cd #{name}\' and \`rackup\'."
+    puts "This will run your application at <http://localhost:9292/>."
   end
 end
