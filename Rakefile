@@ -2,6 +2,8 @@ require 'rubygems'
 
 gemspec = Gem::Specification.load('blossom.gemspec')
 
+task 'default' => 'install'
+
 task 'build' do
   sh 'gem build blossom.gemspec'
 end
