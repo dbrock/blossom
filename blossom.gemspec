@@ -1,6 +1,6 @@
 Gem::Specification.new do |gem|
   gem.name = 'blossom'
-  gem.version = '0.1.4'
+  gem.version = '0.2.0'
 
   gem.author = 'Daniel Brockman'
   gem.email = 'daniel@gointeractive.se'
