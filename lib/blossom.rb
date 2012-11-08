@@ -1,5 +1,3 @@
-require "blossom/version"
-
 require "sass"
 require "compass"
 
