@@ -11,5 +11,4 @@ Gem::Specification.new do |gem|
   gem.add_dependency("sass", "~> 3.2")
   gem.add_dependency("haml", "~> 3.1")
   gem.add_dependency("compass", "~> 0.12")
-  gem.add_dependency("rack-normalize-domain", "~> 0.0.1")
 end

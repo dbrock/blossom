@@ -5,7 +5,6 @@ require "compass"
 
 require "haml"
 require "rack"
-require "rack/normalize-domain"
 require "sinatra/base"
 require "yaml"
 
@@ -125,18 +124,8 @@ class Blossom::Application < Rack::Builder
   end
 
   def build_rack!
-    use_rack_normalize_domain!
     use_rack_coffee!
     run sinatra_app
-  end
-
-  def use_rack_normalize_domain!
-    if @config.strip_www?
-      use Rack::NormalizeDomain
-      Blossom.info "Normalizing domains by removing initial www."
-    else
-      Blossom.info "Not normalizing domains."
-    end
   end
 
   def use_rack_coffee!
