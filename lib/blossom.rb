@@ -122,6 +122,7 @@ class Blossom::Application < Rack::Builder
 
     app.set :haml, haml_options
     app.set :sass, sass_options
+    app.set :scss, sass_options
 
     if custom_sinatra_code
       app.class_eval(custom_sinatra_code)
@@ -133,20 +134,18 @@ class Blossom::Application < Rack::Builder
 
     app.register do
       def path_exists? suffix
-        condition do
+        condition {
           basename = File.basename(request.path_info)
           File.exist? File.join(settings.root, "#{basename}.#{suffix}")
-        end
+        }
       end
   
-      def file_exists? *suffixes
-        condition do
-          suffixes.any? { |suffix|
-            basename = File.basename(request.path_info)
-            barename = basename.sub(/\.[^.]*$/, '')
-            File.exist? File.join(settings.root, "#{barename}.#{suffix}")
-          }
-        end
+      def file_exists? suffix
+        condition {
+          basename = File.basename(request.path_info)
+          barename = basename.sub(/\.[^.]*$/, '')
+          File.exist? File.join(settings.root, "#{barename}.#{suffix}")
+        }
       end
     end
 
@@ -156,7 +155,12 @@ class Blossom::Application < Rack::Builder
       end
     end
 
-    app.get "/:name.css", :file_exists? => [:scss, :sass] do
+    app.get "/:name.css", :file_exists? => :scss do
+      content_type :css
+      scss params[:name].to_sym
+    end
+
+    app.get "/:name.css", :file_exists? => :sass do
       content_type :css
       sass params[:name].to_sym
     end
