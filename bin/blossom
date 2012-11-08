@@ -37,8 +37,6 @@ if ARGV.empty?
   puts usage
 elsif ARGV[0].start_with? "-"
   case ARGV[0]
-  when "--version", "-v"
-    puts Blossom::VERSION
   when "--help", "-h", "-?"
     puts usage
   else
