@@ -94,11 +94,6 @@ run Blossom __FILE__
 source :rubygems
 
 gem "blossom"
-
-# Uncomment the following if you want to use CoffeeScript.
-# (See further instructions in #{name}.js.)
-#
-# gem "rack-coffee"
 ^D
 
     mkdir "public"
@@ -144,17 +139,7 @@ h1
 # end
 ^D
 
-    make_file "#{name}.js", <<"^D"
-// If you do not want to use CoffeeScript, you can delete this comment.
-// If you do, first install the CoffeeScript compiler and Rack::Coffee:
-//
-//    $ npm install -g coffee-script
-//    $ sudo gem install rack-coffee
-//    $ echo 'gem "rack-coffee"' >> Gemfile
-//    $ bundle
-//
-// Then simply delete this file and create #{name}.coffee instead.
-^D
+    make_file "#{name}.js", ''
 
     run "bundle --local"
     run "git init"

@@ -1,8 +1,7 @@
 Blossom is a kind of "anti-framework" built on top of Sinatra with
 the express purpose of minimizing the amount of boilerplate needed
-for state of the art web development.  One command gets you up and
-running on a new web project instantly, with Haml, Sass, Compass,
-and (optionally) CoffeeScript already configured out of the box.
+for modern web development.  One command gets you instantly up and
+running on a new web project with Haml, Sass and Compass.
 
 The goal of Blossom is to eliminate the need for explicit routing and
 configuration for the majority of simple web sites, but when you need

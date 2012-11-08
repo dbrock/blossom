@@ -8,11 +8,6 @@ require "rack"
 require "sinatra/base"
 require "yaml"
 
-begin
-  require "rack/coffee"
-rescue LoadError
-end
-
 module Blossom
   def self.fail(message)
     info "Error: #{message}"
@@ -51,14 +46,6 @@ class Blossom::Application < Rack::Builder
       :output_style      => :compact,
       :project_path      => @root,
       :sass_dir          => ""
-  end
-
-  def coffee_options
-    return \
-      :cache   => @config.cache_content?,
-      :static  => false,
-      :ttl     => @config.content_max_age,
-      :urls    => "/"
   end
 
   def haml_options
@@ -124,17 +111,7 @@ class Blossom::Application < Rack::Builder
   end
 
   def build_rack!
-    use_rack_coffee!
     run sinatra_app
-  end
-
-  def use_rack_coffee!
-    if defined? Rack::Coffee
-      use Rack::Coffee, coffee_options
-      Blossom.info "Using CoffeeScript."
-    else
-      Blossom.info "Not using CoffeeScript."
-    end
   end
 
   def sinatra_app
