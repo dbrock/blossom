@@ -93,7 +93,7 @@ run Blossom __FILE__
     make_file "Gemfile", <<"^D"
 source :rubygems
 
-gem "blossom", "~> #{Blossom::VERSION}"
+gem "blossom"
 
 # Uncomment the following if you want to use CoffeeScript.
 # (See further instructions in #{name}.js.)
