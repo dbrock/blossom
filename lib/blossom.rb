@@ -177,7 +177,7 @@ class Blossom::Application < Rack::Builder
         end
       end
   
-      def file_exists? suffix
+      def file_exists? *suffixes
         condition do
           suffix.respond_to? :any? or suffix = [suffix]
           suffix.any? {
