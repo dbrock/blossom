@@ -179,9 +179,12 @@ class Blossom::Application < Rack::Builder
   
       def file_exists? suffix
         condition do
-          basename = File.basename(request.path_info)
-          barename = basename.sub(/\.[^.]*$/, '')
-          File.exist? File.join(settings.root, "#{barename}.#{suffix}")
+          suffix.respond_to? :any? or suffix = [suffix]
+          suffix.any? {
+            basename = File.basename(request.path_info)
+            barename = basename.sub(/\.[^.]*$/, '')
+            File.exist? File.join(settings.root, "#{barename}.#{suffix}")
+          }
         end
       end
     end
@@ -192,7 +195,7 @@ class Blossom::Application < Rack::Builder
       end
     end
 
-    app.get "/:name.css", :file_exists? => :sass do
+    app.get "/:name.css", :file_exists? => [:scss, :sass] do
       content_type :css
       sass params[:name].to_sym
     end
