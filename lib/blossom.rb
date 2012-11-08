@@ -179,8 +179,7 @@ class Blossom::Application < Rack::Builder
   
       def file_exists? *suffixes
         condition do
-          suffix.respond_to? :any? or suffix = [suffix]
-          suffix.any? {
+          suffixes.any? { |suffix|
             basename = File.basename(request.path_info)
             barename = basename.sub(/\.[^.]*$/, '')
             File.exist? File.join(settings.root, "#{barename}.#{suffix}")
