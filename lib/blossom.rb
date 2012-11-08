@@ -156,7 +156,7 @@ class Blossom::Application < Rack::Builder
     app.set :index, @name.to_sym
 
     app.set :views, @root
-    app.set :public, public_dirname
+    app.set :public_folder, public_dirname
 
     app.set :haml, haml_options
     app.set :sass, sass_options
