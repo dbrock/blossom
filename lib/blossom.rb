@@ -49,9 +49,7 @@ class Blossom::Application < Rack::Builder
   end
 
   def haml_options
-    return \
-      :format        => :html5,
-      :attr_wrapper  => '"'
+    return :format => :html5, :attr_wrapper => '"'
   end
 
   def sass_options
